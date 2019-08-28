@@ -1173,16 +1173,6 @@ EReadStatus CRcvQueue::worker_RetrieveUnit(ref_t<int32_t> r_id, ref_t<CUnit*> r_
     m_pTimer->tick();
 #endif
 
-    // check waiting list, if new socket, insert it to the list
-    while (ifNewEntry())
-    {
-        CUDT* ne = getNewEntry();
-        if (ne)
-        {
-            m_pRcvUList->insert(ne);
-            m_pHash->insert(ne->m_SocketID, ne);
-        }
-    }
     // find next available slot for incoming packet
     *r_unit = m_UnitQueue.getNextAvailUnit();
     if (!*r_unit)
@@ -1216,6 +1206,18 @@ EReadStatus CRcvQueue::worker_RetrieveUnit(ref_t<int32_t> r_id, ref_t<CUnit*> r_
         *r_id = r_unit->m_Packet.m_iID;
         HLOGC(mglog.Debug, log << "INCOMING PACKET: BOUND=" << SockaddrToString(m_pChannel->bindAddress()) << " " << PacketInfo(r_unit->m_Packet));
     }
+
+    // check waiting list, if new socket, insert it to the list
+    while (ifNewEntry())
+    {
+        CUDT* ne = getNewEntry();
+        if (ne)
+        {
+            m_pRcvUList->insert(ne);
+            m_pHash->insert(ne->m_SocketID, ne);
+        }
+    }
+
     return rst;
 }
 
